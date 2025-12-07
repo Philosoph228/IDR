@@ -10,7 +10,7 @@
 //---------------------------------------------------------------------------
 extern  BYTE *Code;
 extern  int __fastcall Adr2Pos(DWORD Adr);
-extern  TCriticalSection* CrtSection;
+extern  CRITICAL_SECTION g_cs;
 
 DWORD* (__stdcall* PdisNew)(int);
 DWORD (_stdcall* CchFormatInstr)(char*, DWORD);
@@ -140,14 +140,14 @@ int __fastcall MDisasm::Disassemble(DWORD fromAdr, PDISINFO pDisInfo, char* disL
 {
     int     _res;
 
-    CrtSection->Enter();
+    ::EnterCriticalSection(&g_cs);
 
     if (Adr2Pos(fromAdr))
         _res = Disassemble(Code + Adr2Pos(fromAdr), (__int64)fromAdr, pDisInfo, disLine);
     else
         _res = 0;
 
-    CrtSection->Leave();
+    ::LeaveCriticalSection(&g_cs);
     return _res;
 }
 //---------------------------------------------------------------------------
@@ -157,7 +157,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
 	char    *p, *q;
     char    Instr[1024];
 
-    CrtSection->Enter();
+    ::EnterCriticalSection(&g_cs);
 
     asm
     {
@@ -228,7 +228,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
         _res = InstrLen;
     }
 
-    CrtSection->Leave();
+    ::LeaveCriticalSection(&g_cs);
 	return _res;
 }
 //---------------------------------------------------------------------------
