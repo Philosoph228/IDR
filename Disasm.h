@@ -108,7 +108,7 @@ public:
     void __fastcall SetPostByte(BYTE b);
     void __fastcall SetOffset(DWORD ofs);
     void __fastcall GetInstrBytes(BYTE* dst);
-    char* __fastcall GetSizeString(int size);
+    const char* __fastcall GetSizeString(int size);
 private:
     bool __fastcall GetAddressSize();
     bool __fastcall GetOperandSize();

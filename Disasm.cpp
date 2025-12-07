@@ -16,31 +16,31 @@ DWORD* (__stdcall* PdisNew)(int);
 DWORD (_stdcall* CchFormatInstr)(char*, DWORD);
 DWORD (_stdcall* Dist)();
 DWORD   *DIS;
-char*   Reg8Tab[8] =
+const char*   Reg8Tab[8] =
 {
     //0     1     2     3     4     5     6     7
     "al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"
 };
-char*   Reg16Tab[8] =
+const char*   Reg16Tab[8] =
 {
     //8     9    10    11    12    13    14    15
     "ax", "cx", "dx", "bx", "sp", "bp", "si", "di"
 };
-char*   Reg32Tab[8] =
+const char*   Reg32Tab[8] =
 {
     //16     17     18     19     20     21     22     23
     "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"
 };
-char*   SegRegTab[8] =
+const char*   SegRegTab[8] =
 {
     //24   25    26    27    28    29    30    31
     "es", "cs", "ss", "ds", "fs", "gs", "??", "??"
 };
-char*   RegCombTab[8] =
+const char*   RegCombTab[8] =
 {
     "bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"
 };
-char*   RepPrefixTab[4] =
+const char*   RepPrefixTab[4] =
 {
     "lock", "repne", "repe", "rep"
 };
@@ -234,7 +234,8 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
 {
-    BYTE    _repPrefix, p, *OpName, *ArgInfo;
+    BYTE    _repPrefix, p, *ArgInfo;
+    const char* OpName;
     int     i, Bytes = 0;
     DWORD   Cmd, Arg;
 
@@ -528,7 +529,7 @@ DWORD       res = 0;
 void __fastcall MDisasm::OutputSegPrefix(char* dst, PDISINFO pDisInfo)
 {
     BYTE    _segPrefix;
-    char    *sptr = NULL;
+    const char    *sptr = NULL;
 
     _segPrefix = GetSegPrefix();
     switch (_segPrefix)
@@ -595,7 +596,7 @@ int __fastcall MDisasm::EvaluateOperandSize()
     return OpSize;
 }
 //---------------------------------------------------------------------------
-char* __fastcall MDisasm::GetSizeString(int size)
+const char* __fastcall MDisasm::GetSizeString(int size)
 {
     if (size == 1) return "byte";
     if (size == 2) return "word";
@@ -608,7 +609,7 @@ char* __fastcall MDisasm::GetSizeString(int size)
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::OutputSizePtr(int size, bool mm, PDISINFO pDisInfo, char* disLine)
 {
-    char*   sptr = NULL;
+    const char*   sptr = NULL;
 
     if (!size) size = EvaluateOperandSize();
     switch (size)
@@ -803,7 +804,8 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
 {
     BYTE    PostByte, SegPrefix, b;
     bool    ofs, mm;
-    char    *regcomb, sign;
+    const char* regcomb;
+    char    sign;
     int     idxofs, idxval;
     DWORD   offset16, dval;
 
