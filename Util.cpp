@@ -1,3 +1,4 @@
+#include "precomp.hpp"
 #include "Util.hpp"
 
 int __fastcall Adr2Pos(DWORD adr)

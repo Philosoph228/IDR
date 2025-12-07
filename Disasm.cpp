@@ -1,12 +1,6 @@
-//---------------------------------------------------------------------------
-#pragma hdrstop
-
-//---------------------------------------------------------------------------
-#include <windows.h>
-#include <winbase.h>
-#include <string.h>
-#include <stdio.h>
+#include "precomp.hpp"
 #include "Disasm.h"
+
 //---------------------------------------------------------------------------
 extern  BYTE *Code;
 extern  int __fastcall Adr2Pos(DWORD Adr);
