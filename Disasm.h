@@ -1,6 +1,5 @@
-//---------------------------------------------------------------------------
-#ifndef DisasmH
-#define DisasmH
+#pragma once
+
 //---------------------------------------------------------------------------
 #define     ASMMAXCOPLEN 12
 //Instruction type
@@ -129,5 +128,3 @@ private:
     void __fastcall OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1, bool f2, PDISINFO pDisInfo, char* disLine);
     void __fastcall OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1, bool f2, PDISINFO pDisInfo, char* disLine);
 };
-//---------------------------------------------------------------------------
-#endif
