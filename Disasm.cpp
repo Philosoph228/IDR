@@ -1,14 +1,11 @@
 //---------------------------------------------------------------------------
-#include <vcl.h>
 #pragma hdrstop
 
 //---------------------------------------------------------------------------
 #include <windows.h>
 #include <winbase.h>
-#include <mem.h>
 #include <string.h>
 #include <stdio.h>
-#include <SyncObjs.hpp>
 #include "Disasm.h"
 //---------------------------------------------------------------------------
 extern  BYTE *Code;
