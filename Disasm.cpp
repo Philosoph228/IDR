@@ -159,7 +159,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
 
     ::EnterCriticalSection(&g_cs);
 
-    asm
+    __asm
     {
         push    64h
         mov     ecx, [DIS]
@@ -272,7 +272,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
         }
     }
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     edx, [ecx+4Ch]
@@ -314,7 +314,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
     strcpy(pDisInfo->Mnem, OpName);
     Bytes += strlen(OpName);
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     edx, [ecx+4Ch]
@@ -333,7 +333,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
             else
                 strcat(disLine, ",");
         }
-        asm
+        __asm
         {
             mov     ecx, [ArgInfo]
             xor     edx, edx
@@ -399,7 +399,7 @@ DWORD   __fastcall MDisasm::GetAddress()
 int         n;
 DWORD       res = 0;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+68h]
@@ -416,7 +416,7 @@ DWORD       res = 0;
     case 8:
     case 9:
     case 0x11:
-        asm
+        __asm
         {
             xor     eax, eax
             mov     dword ptr [res], eax
@@ -426,7 +426,7 @@ DWORD       res = 0;
     case 0xA:
     case 0xC:
     case 0xD:
-        asm
+        __asm
         {
             mov     ecx, [DIS]
             mov     eax, [ecx+64h]
@@ -444,13 +444,13 @@ DWORD       res = 0;
             adc     esi, ebp
             pop     ebp
             test    al, al
-            jnz     @GA1
+            jnz     GA1
             and     edi, 0FFFFh
             and     esi, 0
-        @GA1:
+        GA1:
             mov     eax, [ecx+8]
             test    eax, eax
-            jnz     @GA2
+            jnz     GA2
             and     ebx, 0FFFF0000h
             and     edi, 0FFFFh
             or      ebx, edi
@@ -458,7 +458,7 @@ DWORD       res = 0;
             xor     ecx, ecx
             mov     edi, ebx
             or      esi, ecx
-        @GA2:
+        GA2:
             mov     eax, edi
             mov     edx, esi
             mov     dword ptr [res], eax
@@ -468,18 +468,18 @@ DWORD       res = 0;
     case 0xB:
     case 0xE:
     case 0xF:
-        asm
+        __asm
         {
             mov     al, [ecx+51h]
             test    al, al
-            jz      @GA3
+            jz      GA3
             mov     edx, [ecx+64h]
             mov     eax, [edx+ecx+3Ch]
-            jmp     @GA4
-        @GA3:
+            jmp     GA4
+        GA3:
             mov     eax, [ecx+64h]
             movsx   eax, word ptr [eax+ecx+3Ch]
-        @GA4:
+        GA4:
             mov     edi, [ecx+38h]
             mov     ebx, [ecx+28h]
             cdq
@@ -493,13 +493,13 @@ DWORD       res = 0;
             adc     esi, ebp
             pop     ebp
             test    al, al
-            jnz     @GA5
+            jnz     GA5
             and     edi, 0FFFFh
             and     esi, 0
-        @GA5:
+        GA5:
             mov     eax, [ecx+8]
             test    eax, eax
-            jnz     @GA6
+            jnz     GA6
             and     ebx, 0FFFF0000h
             and     edi, 0FFFFh
             or      ebx, edi
@@ -507,7 +507,7 @@ DWORD       res = 0;
             xor     ecx, ecx
             mov     edi, ebx
             or      esi, ecx
-        @GA6:
+        GA6:
             mov     eax, edi
             mov     edx, esi
             mov     dword ptr [res], eax
@@ -515,7 +515,7 @@ DWORD       res = 0;
         break;
     case 6:
     case 0x10:
-        asm
+        __asm
         {
             mov     edx, [ecx+64h]
             mov     eax, [edx+ecx+3Ch]
@@ -570,7 +570,7 @@ int __fastcall MDisasm::EvaluateOperandSize()
     int     OpSize;
 
     OperandSize = GetOperandSize();
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     ecx, [ecx+4Ch]
@@ -658,7 +658,7 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
     int     ss, index, base, idxofs, idxval;
     DWORD   offset32;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     edx, [ecx+5Ch]
@@ -682,7 +682,7 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
     ofs = false;
     index = -1;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     edx, [ecx+5Ch]
@@ -809,7 +809,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
     int     idxofs, idxval;
     DWORD   offset16, dval;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     edx, [ecx+5Ch]
@@ -852,21 +852,21 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
 
     if ((PostByte & 0xC0) == 0x40)  //mod=01
     {
-        asm
+        __asm
         {
             mov     ecx, [DIS]
             mov     edx, [ecx+5Ch]
             mov     al, [edx+ecx+3Dh]
             test    al, 80h
             mov     byte ptr [offset16], al
-            jnz     @OM16_1
+            jnz     OM16_1
             mov     eax, [offset16]
             mov     [sign], '+'
-            jmp     @OM16_2
-        @OM16_1:
+            jmp     OM16_2
+        OM16_1:
             mov     [sign], '-'
             neg     eax
-        @OM16_2:
+        OM16_2:
             and     eax, 0FFh
             mov     [offset16], eax
         }
@@ -891,7 +891,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
     if (ofs)
     {
         if (regcomb) strcat(dst, "+");
-        asm
+        __asm
         {
             mov     ecx, [DIS]
             mov     edx, [ecx+5Ch]
@@ -928,7 +928,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         OperandSize = GetOperandSize();
         if (OperandSize)
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -937,7 +937,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     [dval], eax
             }
             p += sprintf(p, "%04lX:", dval);
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -948,7 +948,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         }
         else
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -957,7 +957,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     [dval], eax
             }
             p += sprintf(p, "%04lX:", dval);
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -998,7 +998,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
     case 7:
         if (GetCop() == 0x83)
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -1008,7 +1008,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         }
         else
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -1023,7 +1023,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         break;
     //Immediate byte
     case 8:
-        asm
+        __asm
         {
             mov     ecx, [DIS]
             mov     edx, [ecx+64h]
@@ -1041,7 +1041,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         OperandSize = GetOperandSize();
         if (OperandSize)
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -1051,7 +1051,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         }
         else
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -1067,7 +1067,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         break;
     //Immediate word (ret)
     case 0xA:
-        asm
+        __asm
         {
             mov     ecx, [DIS]
             mov     edx, [ecx+64h]
@@ -1120,7 +1120,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         AddressSize = GetAddressSize();
         if (AddressSize)
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -1130,7 +1130,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         }
         else
         {
-            asm
+            __asm
             {
                 mov     ecx, [DIS]
                 mov     edx, [ecx+64h]
@@ -1255,7 +1255,7 @@ bool __fastcall MDisasm::GetAddressSize()
 {
 bool        res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+50h]
@@ -1268,7 +1268,7 @@ bool __fastcall MDisasm::GetOperandSize()
 {
 bool        res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+51h]
@@ -1281,7 +1281,7 @@ BYTE __fastcall MDisasm::GetSegPrefix()
 {
 BYTE        res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+52h]
@@ -1294,7 +1294,7 @@ BYTE __fastcall MDisasm::GetRepPrefix()
 {
 BYTE        res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+53h]
@@ -1307,7 +1307,7 @@ BYTE __fastcall MDisasm::GetCop()
 {
 BYTE        res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+58h]
@@ -1321,7 +1321,7 @@ BYTE __fastcall MDisasm::GetCop1()
 {
 BYTE        res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+58h]
@@ -1335,7 +1335,7 @@ BYTE __fastcall MDisasm::GetPostByte()
 {
 BYTE         res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+5Ch]
@@ -1347,7 +1347,7 @@ BYTE         res;
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::SetPostByte(BYTE b)
 {
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     edx, [ecx+5Ch]
@@ -1360,7 +1360,7 @@ BYTE __fastcall MDisasm::GetPostByteMod()
 {
 BYTE         res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+5Ch]
@@ -1375,7 +1375,7 @@ int __fastcall MDisasm::GetPostByteReg()
 {
 int         res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+5Ch]
@@ -1391,7 +1391,7 @@ int __fastcall MDisasm::GetPostByteRm()
 {
 int         res;
 
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+5Ch]
@@ -1407,7 +1407,7 @@ void __fastcall MDisasm::SetOffset(DWORD ofs)
     BYTE AddressSize = GetAddressSize();
     if (AddressSize)
     {
-        asm
+        __asm
         {
             mov     ecx, [DIS]
             mov     edx, [ecx+64h]
@@ -1417,7 +1417,7 @@ void __fastcall MDisasm::SetOffset(DWORD ofs)
     }
     else
     {
-        asm
+        __asm
         {
             mov     ecx, [DIS]
             mov     edx, [ecx+64h]
@@ -1429,7 +1429,7 @@ void __fastcall MDisasm::SetOffset(DWORD ofs)
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::GetInstrBytes(BYTE* dst)
 {
-    asm
+    __asm
     {
         mov     ecx, [DIS]
         lea     esi, [ecx+3Ch]
