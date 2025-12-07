@@ -62,7 +62,7 @@ __fastcall MDisasm::~MDisasm()
 //---------------------------------------------------------------------------
 int __fastcall MDisasm::Init()
 {
-    hModule = LoadLibrary("dis.dll");
+    hModule = LoadLibrary(L"dis.dll");
     if (!hModule) return 0;
     PdisNew = (DWORD* (__stdcall*)(int))GetProcAddress(hModule, "?PdisNew@DIS@@SGPAV1@W4DIST@1@@Z");
     CchFormatInstr = (DWORD (_stdcall*)(char*, DWORD))GetProcAddress(hModule, "?CchFormatInstr@DIS@@QBEIPADI@Z");
