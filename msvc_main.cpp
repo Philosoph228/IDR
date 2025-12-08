@@ -7,6 +7,57 @@ BYTE* Code;
 CRITICAL_SECTION g_cs;
 
 static constexpr int CODE_SIZE = 4096;
+static const WCHAR g_cszDisasmViewClass[] = L"__DisasmView";
+
+HINSTANCE g_hInst;
+
+LRESULT CALLBACK DisasmViewProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps{};
+        HDC hdc = ::BeginPaint(hWnd, &ps);
+        static const std::wstring mnemonic = L"xor eax, eax";
+
+        RECT rcClient;
+        ::GetClientRect(hWnd, &rcClient);
+        ::DrawText(hdc, mnemonic.c_str(), mnemonic.length(), &rcClient, DT_SINGLELINE);
+
+        ::EndPaint(hWnd, &ps);
+    }
+        return 0;
+
+    case WM_CREATE:
+        return 0;
+    }
+
+    return ::DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+BOOL RegisterDisasmViewClass()
+{
+    WNDCLASSEX wcex{};
+    if (!::GetClassInfoEx(g_hInst, g_cszDisasmViewClass, &wcex))
+    {
+        std::memset(&wcex, 0, sizeof(wcex));
+        wcex.cbSize = sizeof(WNDCLASSEX);
+        wcex.style = CS_HREDRAW | CS_VREDRAW;
+        wcex.cbClsExtra = 0;
+        wcex.cbWndExtra = 0;
+        wcex.lpfnWndProc = static_cast<WNDPROC>(&DisasmViewProc);
+        wcex.hInstance = g_hInst;
+        wcex.hIcon = nullptr;
+        wcex.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
+        wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+        wcex.lpszClassName = g_cszDisasmViewClass;
+
+        return !!RegisterClassEx(&wcex);
+    }
+
+    return TRUE;
+}
 
 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -47,9 +98,11 @@ void AllocCode()
 
 int main(int argc, char* argv[])
 {
-	HINSTANCE hInst = ::GetModuleHandle(nullptr);
+	g_hInst = ::GetModuleHandle(nullptr);
 
-	HWND hDialog = ::CreateDialogParamW(hInst, MAKEINTRESOURCE(IDD_DIALOG1), nullptr, static_cast<DLGPROC>(&DlgProc), 0);
+	RegisterDisasmViewClass();
+
+	HWND hDialog = ::CreateDialogParamW(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), nullptr, static_cast<DLGPROC>(&DlgProc), 0);
 	::ShowWindow(hDialog, SW_SHOW);
 
 	::InitializeCriticalSection(&g_cs);
