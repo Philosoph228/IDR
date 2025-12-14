@@ -6,11 +6,16 @@ AlignAfterOpenBracket: DontAlign                   # edit distance 108895
 AlignArrayOfStructures: None                       # edit distance 108895
 AlignConsecutiveAssignments: None                  # edit distance 108895
 AlignConsecutiveBitFields: None                    # inherited from prefix Align
-AlignConsecutiveDeclarations: None                 # edit distance 108895
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCompound: true
+  PadOperators: true
 AlignConsecutiveMacros: AcrossEmptyLines           # edit distance 107915
 AlignEscapedNewlines: Right                        # Using default value Right
 AlignOperands: DontAlign                           # edit distance 107751
-AlignTrailingComments: false                       # edit distance 107168
+AlignTrailingComments: Leave
 AllowAllArgumentsOnNextLine: false                 # edit distance 107110
 AllowAllParametersOfDeclarationOnNextLine: true    # did not affect the output
 AllowShortBlocksOnASingleLine: Never               # edit distance 107110
@@ -47,7 +52,6 @@ BraceWrapping:
   SplitEmptyFunction: true                         # edit distance 73558
   SplitEmptyRecord: true                           # inherited from prefix BraceWrapping
   SplitEmptyNamespace: true                        # inherited from prefix BraceWrapping
-BreakAfterJavaFieldAnnotations: true               # did not affect the output
 BreakBeforeBinaryOperators: None                   # edit distance 73558
 BreakBeforeConceptDeclarations: true               # did not affect the output
 BreakBeforeTernaryOperators: true                  # did not affect the output
@@ -57,7 +61,7 @@ BreakStringLiterals: true                          # did not affect the output
 ColumnLimit: 140                                   # edit distance 68305
 CompactNamespaces: true                            # did not affect the output
 ConstructorInitializerIndentWidth: 0               # did not affect the output
-ContinuationIndentWidth: 0                         # edit distance 67966
+ContinuationIndentWidth: 4                         # edit distance 67966
 Cpp11BracedListStyle: true                         # edit distance 67966
 DeriveLineEnding: true                             # inherited from prefix Derive
 DerivePointerAlignment: true                       # edit distance 66746
@@ -75,8 +79,9 @@ IndentPPDirectives: None                           # edit distance 66704
 IndentRequires: false                              # inherited from prefix Indent
 IndentWidth: 4                                     # edit distance 66704
 IndentWrappedFunctionNames: false                  # inherited from prefix Indent
+InsertNewlineAtEOF: true
 InsertTrailingCommas: None                         # did not affect the output
-KeepEmptyLinesAtTheStartOfBlocks: true             # edit distance 66704
+KeepEmptyLinesAtTheStartOfBlocks: false             # edit distance 66704
 LambdaBodyIndentation: Signature                   # did not affect the output
 MaxEmptyLinesToKeep: 2                             # edit distance 66700
 NamespaceIndentation: None                         # did not affect the output
@@ -97,7 +102,7 @@ ReferenceAlignment: Pointer                        # did not affect the output
 RemoveBracesLLVM: false                            # edit distance 66182
 ReflowComments: false                              # edit distance 61156
 RequiresClausePosition: OwnLine                    # did not affect the output
-SeparateDefinitionBlocks: Leave                    # edit distance 61156
+SeparateDefinitionBlocks: Never                    # edit distance 61156
 ShortNamespaceLines: 0                             # did not affect the output
 SortIncludes: Never                                # edit distance 59194
 SortUsingDeclarations: true                        # did not affect the output
@@ -125,13 +130,13 @@ SpaceBeforeRangeBasedForLoopColon: true            # edit distance 59193
 SpaceBeforeSquareBrackets: false                   # edit distance 59193
 SpaceInEmptyBlock: false                           # edit distance 59193
 SpaceInEmptyParentheses: false                     # edit distance 59193
-SpacesBeforeTrailingComments: 0                    # edit distance 59132
+SpacesBeforeTrailingComments: 3                    # edit distance 59132
 SpacesInAngles: Never                              # edit distance 59132
 SpacesInCStyleCastParentheses: false               # edit distance 59132
 SpacesInConditionalStatement: false                # edit distance 59132
 SpacesInContainerLiterals: true                    # did not affect the output
 SpacesInParentheses: false                         # edit distance 59132
-Standard: c++03                                    # did not affect the output
+Standard: Latest
 TabWidth: 4                                        # did not affect the output
 UseCRLF: true                                      # did not affect the output
 UseTab: Never                                      # edit distance 59132
