@@ -153,6 +153,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
 
     ::EnterCriticalSection(&g_cs);
 
+    // clang-format off
     __asm
     {
         push    64h
@@ -164,6 +165,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
         call    dword ptr [edx+18h]
         mov     [InstrLen], eax
     }
+    // clang-format on
 
     //If address of structure DISINFO not given, return only instruction length
     if (pDisInfo)
@@ -179,6 +181,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
             pDisInfo->RepPrefix = -1;
             pDisInfo->SegPrefix = -1;
             /*
+            // clang-format off
             asm
             {
                 push    400h
@@ -187,6 +190,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
                 mov     ecx, [DIS]
                 call    CchFormatInstr
             }
+            // clang-format on
             */
             FormatInstr(pDisInfo, disLine);
             if (pDisInfo->IndxReg != -1 && !pDisInfo->Scale) pDisInfo->Scale = 1;
@@ -266,6 +270,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
         }
     }
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -273,6 +278,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
         mov     eax, [edx]
         mov     [OpName], eax
     }
+    // clang-format on
 
     if (!GetOperandSize())
     {
@@ -308,6 +314,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
     strcpy(pDisInfo->Mnem, OpName);
     Bytes += strlen(OpName);
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -316,6 +323,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
         add     eax, 9
         mov     [ArgInfo], eax
     }
+    // clang-format on
 
     for (i = 0; i < 3; i++)
     {
@@ -327,6 +335,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
             else
                 strcat(disLine, ",");
         }
+        // clang-format off
         __asm
         {
             mov     ecx, [ArgInfo]
@@ -339,6 +348,7 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
             add     ecx, 4
             mov     [ArgInfo], ecx
         }
+        // clang-format on
 
         FormatArg(i, Cmd, Arg, pDisInfo, disLine);
         pDisInfo->OpNum++;
@@ -393,12 +403,14 @@ DWORD   __fastcall MDisasm::GetAddress()
 int         n;
 DWORD       res = 0;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
         mov     eax, [ecx+68h]
         mov     [n], eax
     }
+    // clang-format on
 
     switch (n)
     {
@@ -410,16 +422,19 @@ DWORD       res = 0;
     case 8:
     case 9:
     case 0x11:
+        // clang-format off
         __asm
         {
             xor     eax, eax
             mov     dword ptr [res], eax
         }
+        // clang-format on
         break;
     case 4:
     case 0xA:
     case 0xC:
     case 0xD:
+        // clang-format off
         __asm
         {
             mov     ecx, [DIS]
@@ -457,11 +472,13 @@ DWORD       res = 0;
             mov     edx, esi
             mov     dword ptr [res], eax
         }
+        // clang-format on
         break;
     case 5:
     case 0xB:
     case 0xE:
     case 0xF:
+        // clang-format off
         __asm
         {
             mov     al, [ecx+51h]
@@ -506,15 +523,18 @@ DWORD       res = 0;
             mov     edx, esi
             mov     dword ptr [res], eax
         }
+        // clang-format on
         break;
     case 6:
     case 0x10:
+        // clang-format off
         __asm
         {
             mov     edx, [ecx+64h]
             mov     eax, [edx+ecx+3Ch]
             mov     dword ptr [res], eax
         }
+        // clang-format on
         break;
     }
     return res;
@@ -564,6 +584,7 @@ int __fastcall MDisasm::EvaluateOperandSize()
     int     OpSize;
 
     OperandSize = GetOperandSize();
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -571,6 +592,7 @@ int __fastcall MDisasm::EvaluateOperandSize()
         mov     ecx, [ecx+4]
         mov     [Ofs], ecx
     }
+    // clang-format on
 
     OpSize = (!OperandSize) ? 2: 4;
     if (Ofs == 0x1041BB30 ||    //INVLPG, PREFETCH, PREFETCHW
@@ -652,6 +674,7 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
     int     ss, index, base, idxofs, idxval;
     DWORD   offset32;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -659,6 +682,7 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
         mov     al, [edx+ecx+3Ch]
         mov     [PostByte], al
     }
+    // clang-format on
     mod = PostByte & 0xC0;
     if (mod == 0xC0)
     {
@@ -676,6 +700,7 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
     ofs = false;
     index = -1;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -683,6 +708,7 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
         lea     eax, [edx+ecx+3Dh]
         mov     [pos], eax
     }
+    // clang-format on
 
     base = PostByte & 7;
 
@@ -803,6 +829,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
     int     idxofs, idxval;
     DWORD   offset16, dval;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -810,6 +837,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
         mov     al, [edx+ecx+3Ch]
         mov     [PostByte], al
     }
+    // clang-format on
     if ((PostByte & 0xC0) == 0xC0)  //mod=11
     {
         if (!f1 && !f2)
@@ -846,6 +874,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
 
     if ((PostByte & 0xC0) == 0x40)  //mod=01
     {
+        // clang-format off
         __asm
         {
             mov     ecx, [DIS]
@@ -864,6 +893,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
             and     eax, 0FFh
             mov     [offset16], eax
         }
+        // clang-format on
     }
     else if ((PostByte & 0xC0) == 0x80) //mod=10
     {
@@ -885,6 +915,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
     if (ofs)
     {
         if (regcomb) strcat(dst, "+");
+        // clang-format off
         __asm
         {
             mov     ecx, [DIS]
@@ -893,6 +924,7 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
             mov     ax, [ecx+edx+3Dh]
             mov     [dval], eax
         }
+        // clang-format on
         pDisInfo->Offset = dval;
         sprintf(dst + strlen(dst), "%04lX]", dval);
         return;
@@ -922,6 +954,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         OperandSize = GetOperandSize();
         if (OperandSize)
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -930,7 +963,9 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     ax, [edx+ecx+40h]
                 mov     [dval], eax
             }
+            // clang-format on
             p += sprintf(p, "%04lX:", dval);
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -938,10 +973,12 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     eax, [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
             sprintf(p, "%08lX", dval);
         }
         else
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -950,7 +987,9 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     ax, [edx+ecx+3Eh]
                 mov     [dval], eax
             }
+            // clang-format on
             p += sprintf(p, "%04lX:", dval);
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -959,6 +998,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     ax, [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
             sprintf(p, "%04lX", dval);
         }
         break;
@@ -992,6 +1032,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
     case 7:
         if (GetCop() == 0x83)
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -999,9 +1040,11 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 movsx   eax, byte ptr [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
         }
         else
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -1009,6 +1052,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 movzx   eax, byte ptr [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
         }
         pDisInfo->Immediate = dval;
         //pDisInfo->ImmPresent = true;
@@ -1017,6 +1061,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         break;
     //Immediate byte
     case 8:
+        // clang-format off
         __asm
         {
             mov     ecx, [DIS]
@@ -1025,6 +1070,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
             mov     al, [edx+ecx+3Eh]
             mov     [dval], eax
         }
+        // clang-format on
         pDisInfo->Immediate = dval;
         //pDisInfo->ImmPresent = true;
         //pDisInfo->ImmSize = 1;
@@ -1035,6 +1081,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         OperandSize = GetOperandSize();
         if (OperandSize)
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -1042,9 +1089,11 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     eax, [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
         }
         else
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -1053,6 +1102,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     ax, [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
         }
         pDisInfo->Immediate = dval;
         //pDisInfo->ImmPresent = true;
@@ -1061,6 +1111,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         break;
     //Immediate word (ret)
     case 0xA:
+        // clang-format off
         __asm
         {
             mov     ecx, [DIS]
@@ -1069,6 +1120,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
             mov     ax, [edx+ecx+3Ch]
             mov     [dval], eax
         }
+        // clang-format on
         pDisInfo->Immediate = dval;
         //pDisInfo->ImmPresent = true;
         //pDisInfo->ImmSize = 2;
@@ -1114,6 +1166,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
         AddressSize = GetAddressSize();
         if (AddressSize)
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -1121,9 +1174,11 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     eax, [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
         }
         else
         {
+            // clang-format off
             __asm
             {
                 mov     ecx, [DIS]
@@ -1132,6 +1187,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
                 mov     ax, [edx+ecx+3Ch]
                 mov     [dval], eax
             }
+            // clang-format on
         }
         sprintf(Op + strlen(Op), "[%08lX]", dval);
         pDisInfo->Offset = dval;    //!
@@ -1249,12 +1305,14 @@ bool __fastcall MDisasm::GetAddressSize()
 {
 bool        res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+50h]
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1262,12 +1320,14 @@ bool __fastcall MDisasm::GetOperandSize()
 {
 bool        res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+51h]
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1275,12 +1335,14 @@ BYTE __fastcall MDisasm::GetSegPrefix()
 {
 BYTE        res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+52h]
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1288,12 +1350,14 @@ BYTE __fastcall MDisasm::GetRepPrefix()
 {
 BYTE        res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
         mov     al, [ecx+53h]
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1301,6 +1365,7 @@ BYTE __fastcall MDisasm::GetCop()
 {
 BYTE        res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1308,6 +1373,7 @@ BYTE        res;
         mov     al, [eax+ecx+3Ch]
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1315,6 +1381,7 @@ BYTE __fastcall MDisasm::GetCop1()
 {
 BYTE        res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1322,6 +1389,7 @@ BYTE        res;
         mov     al, [eax+ecx+3Dh]
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1329,6 +1397,7 @@ BYTE __fastcall MDisasm::GetPostByte()
 {
 BYTE         res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1336,11 +1405,13 @@ BYTE         res;
         mov     al, [eax+ecx+3Ch]
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::SetPostByte(BYTE b)
 {
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1348,12 +1419,14 @@ void __fastcall MDisasm::SetPostByte(BYTE b)
         mov     al, [b]
         mov     [ecx+edx+3Ch], al
     }
+    // clang-format on
 }
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetPostByteMod()
 {
 BYTE         res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1362,6 +1435,7 @@ BYTE         res;
         and     al, 0C0h
         mov     [res], al
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1369,6 +1443,7 @@ int __fastcall MDisasm::GetPostByteReg()
 {
 int         res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1378,6 +1453,7 @@ int         res;
         and     eax, 7
         mov     [res], eax
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1385,6 +1461,7 @@ int __fastcall MDisasm::GetPostByteRm()
 {
 int         res;
 
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1393,6 +1470,7 @@ int         res;
         and     eax, 7
         mov     [res], eax
     }
+    // clang-format on
     return res;
 }
 //---------------------------------------------------------------------------
@@ -1401,6 +1479,7 @@ void __fastcall MDisasm::SetOffset(DWORD ofs)
     BYTE AddressSize = GetAddressSize();
     if (AddressSize)
     {
+        // clang-format off
         __asm
         {
             mov     ecx, [DIS]
@@ -1408,9 +1487,11 @@ void __fastcall MDisasm::SetOffset(DWORD ofs)
             mov     eax, [ofs]
             mov     [edx+ecx+3Ch], eax
         }
+        // clang-format on
     }
     else
     {
+        // clang-format off
         __asm
         {
             mov     ecx, [DIS]
@@ -1418,11 +1499,13 @@ void __fastcall MDisasm::SetOffset(DWORD ofs)
             mov     eax, [ofs]
             mov     [edx+ecx+3Ch], ax
         }
+        // clang-format on
     }
 }
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::GetInstrBytes(BYTE* dst)
 {
+    // clang-format off
     __asm
     {
         mov     ecx, [DIS]
@@ -1431,5 +1514,6 @@ void __fastcall MDisasm::GetInstrBytes(BYTE* dst)
         mov     ecx, [ecx+38h]
         rep     movsb
     }
+    // clang-format on
 }
 //---------------------------------------------------------------------------
