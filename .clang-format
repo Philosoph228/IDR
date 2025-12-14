@@ -132,6 +132,6 @@ SpacesInConditionalStatement: false                # edit distance 59132
 SpacesInContainerLiterals: true                    # did not affect the output
 SpacesInParentheses: false                         # edit distance 59132
 Standard: c++03                                    # did not affect the output
-TabWidth: 0                                        # did not affect the output
+TabWidth: 4                                        # did not affect the output
 UseCRLF: true                                      # did not affect the output
 UseTab: Never                                      # edit distance 59132
