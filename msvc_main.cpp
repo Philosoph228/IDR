@@ -3,11 +3,11 @@
 #include <iostream>
 #include "resource.h"
 
-BYTE* Code;
+BYTE*            Code;
 CRITICAL_SECTION g_cs;
 
 static constexpr int CODE_SIZE = 4096;
-static const WCHAR g_cszDisasmViewClass[] = L"__DisasmView";
+static const WCHAR   g_cszDisasmViewClass[] = L"__DisasmView";
 
 HINSTANCE g_hInst;
 
@@ -18,7 +18,8 @@ LRESULT CALLBACK DisasmViewProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     case WM_PAINT:
     {
         PAINTSTRUCT ps{};
-        HDC hdc = ::BeginPaint(hWnd, &ps);
+        HDC         hdc = ::BeginPaint(hWnd, &ps);
+
         static const std::wstring mnemonic = L"xor eax, eax";
 
         RECT rcClient;
@@ -90,51 +91,51 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return FALSE;
 }
 
-
 void AllocCode()
 {
-	Code = (BYTE*)malloc(CODE_SIZE);
+    Code = (BYTE*)malloc(CODE_SIZE);
 }
 
 int main(int argc, char* argv[])
 {
-	g_hInst = ::GetModuleHandle(nullptr);
+    g_hInst = ::GetModuleHandle(nullptr);
 
-	RegisterDisasmViewClass();
+    RegisterDisasmViewClass();
 
-	HWND hDialog = ::CreateDialogParamW(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), nullptr, static_cast<DLGPROC>(&DlgProc), 0);
-	::ShowWindow(hDialog, SW_SHOW);
+    HWND hDialog = ::CreateDialogParamW(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), nullptr, static_cast<DLGPROC>(&DlgProc), 0);
+    ::ShowWindow(hDialog, SW_SHOW);
 
-	::InitializeCriticalSection(&g_cs);
+    ::InitializeCriticalSection(&g_cs);
 
-	std::cout << "IDR MSVC Started\n";
-	AllocCode();
+    std::cout << "IDR MSVC Started\n";
+    AllocCode();
 
-	MDisasm disasm;
-	disasm.Init();
+    MDisasm disasm;
+    disasm.Init();
 
-	int instrLen = 0;
-	size_t curPos = 0;
-	DWORD curAdr = 4;
-	DISINFO disInfo;
+    int     instrLen = 0;
+    size_t  curPos = 0;
+    DWORD   curAdr = 4;
+    DISINFO disInfo;
 
-	char disLine[1024];
-	instrLen = disasm.Disassemble(Code + curPos, curAdr, &disInfo, disLine);
+    char disLine[1024];
+    instrLen = disasm.Disassemble(Code + curPos, curAdr, &disInfo, disLine);
 
-	::DeleteCriticalSection(&g_cs);
+    ::DeleteCriticalSection(&g_cs);
 
-	std::cout << "Instruction length: " << instrLen << "\nDisassembled line: " << disLine << '\n';
+    std::cout << "Instruction length: " << instrLen << "\nDisassembled line: " << disLine << '\n';
 
     MSG msg{};
     while (::GetMessage(&msg, nullptr, 0, 0))
     {
-        if (!IsDialogMessage(hDialog, &msg)) {
+        if (!IsDialogMessage(hDialog, &msg))
+        {
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
         }
     }
 
     return static_cast<int>(msg.wParam);
-	
-	return 0;
+
+    return 0;
 }

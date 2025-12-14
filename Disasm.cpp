@@ -2,42 +2,32 @@
 #include "Disasm.h"
 
 //---------------------------------------------------------------------------
-extern  BYTE *Code;
-extern  int __fastcall Adr2Pos(DWORD Adr);
-extern  CRITICAL_SECTION g_cs;
+extern BYTE* Code;
+extern int __fastcall Adr2Pos(DWORD Adr);
+extern CRITICAL_SECTION g_cs;
 
-DWORD* (__stdcall* PdisNew)(int);
-DWORD (_stdcall* CchFormatInstr)(char*, DWORD);
-DWORD (_stdcall* Dist)();
-DWORD   *DIS;
-const char*   Reg8Tab[8] =
-{
+DWORD*(__stdcall* PdisNew)(int);
+DWORD(_stdcall* CchFormatInstr)(char*, DWORD);
+DWORD(_stdcall* Dist)();
+DWORD*      DIS;
+const char* Reg8Tab[8] = {
     //0     1     2     3     4     5     6     7
     "al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"
 };
-const char*   Reg16Tab[8] =
-{
+const char* Reg16Tab[8] = {
     //8     9    10    11    12    13    14    15
     "ax", "cx", "dx", "bx", "sp", "bp", "si", "di"
 };
-const char*   Reg32Tab[8] =
-{
+const char* Reg32Tab[8] = {
     //16     17     18     19     20     21     22     23
     "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi"
 };
-const char*   SegRegTab[8] =
-{
+const char* SegRegTab[8] = {
     //24   25    26    27    28    29    30    31
     "es", "cs", "ss", "ds", "fs", "gs", "??", "??"
 };
-const char*   RegCombTab[8] =
-{
-    "bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"
-};
-const char*   RepPrefixTab[4] =
-{
-    "lock", "repne", "repe", "rep"
-};
+const char* RegCombTab[8] = { "bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx" };
+const char* RepPrefixTab[4] = { "lock", "repne", "repe", "rep" };
 //---------------------------------------------------------------------------
 __fastcall MDisasm::MDisasm()
 {
@@ -58,16 +48,16 @@ int __fastcall MDisasm::Init()
 {
     hModule = LoadLibrary(L"dis.dll");
     if (!hModule) return 0;
-    PdisNew = (DWORD* (__stdcall*)(int))GetProcAddress(hModule, "?PdisNew@DIS@@SGPAV1@W4DIST@1@@Z");
-    CchFormatInstr = (DWORD (_stdcall*)(char*, DWORD))GetProcAddress(hModule, "?CchFormatInstr@DIS@@QBEIPADI@Z");
-    Dist = (DWORD (_stdcall*)())GetProcAddress(hModule, "?Dist@DIS@@QBE?AW4DIST@1@XZ");
+    PdisNew = (DWORD * (__stdcall*)(int)) GetProcAddress(hModule, "?PdisNew@DIS@@SGPAV1@W4DIST@1@@Z");
+    CchFormatInstr = (DWORD(_stdcall*)(char*, DWORD))GetProcAddress(hModule, "?CchFormatInstr@DIS@@QBEIPADI@Z");
+    Dist = (DWORD(_stdcall*)())GetProcAddress(hModule, "?Dist@DIS@@QBE?AW4DIST@1@XZ");
     DIS = PdisNew(1);
     return 1;
 }
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetOp(char* mnem)
 {
-    DWORD   dd = *((DWORD*)mnem);
+    DWORD dd = *((DWORD*)mnem);
 
     if ((dd & 0xFFFFFF) == 'vom')
     {
@@ -75,36 +65,36 @@ BYTE __fastcall MDisasm::GetOp(char* mnem)
         return OP_MOVS;
     }
     if (dd == 'hsup') return OP_PUSH;
-    if (dd == 'pop')  return OP_POP;
-    if (dd == 'pmj')  return OP_JMP;
-    if (dd == 'rox')  return OP_XOR;
-    if (dd == 'pmc')  return OP_CMP;
+    if (dd == 'pop') return OP_POP;
+    if (dd == 'pmj') return OP_JMP;
+    if (dd == 'rox') return OP_XOR;
+    if (dd == 'pmc') return OP_CMP;
     if (dd == 'tset') return OP_TEST;
-    if (dd == 'ael')  return OP_LEA;
-    if (dd == 'dda')  return OP_ADD;
-    if (dd == 'bus')  return OP_SUB;
-    if (dd == 'ro')   return OP_OR;
-    if (dd == 'dna')  return OP_AND;
-    if (dd == 'cni')  return OP_INC;
-    if (dd == 'ced')  return OP_DEC;
-    if (dd == 'lum')  return OP_MUL;
-    if (dd == 'vid')  return OP_DIV;
+    if (dd == 'ael') return OP_LEA;
+    if (dd == 'dda') return OP_ADD;
+    if (dd == 'bus') return OP_SUB;
+    if (dd == 'ro') return OP_OR;
+    if (dd == 'dna') return OP_AND;
+    if (dd == 'cni') return OP_INC;
+    if (dd == 'ced') return OP_DEC;
+    if (dd == 'lum') return OP_MUL;
+    if (dd == 'vid') return OP_DIV;
     if (dd == 'lumi') return OP_IMUL;
     if (dd == 'vidi') return OP_IDIV;
-    if (dd == 'lhs' || dd == 'dlhs')  return OP_SHL;
-    if (dd == 'rhs' || dd == 'drhs')  return OP_SHR;
-    if (dd == 'las')  return OP_SAL;
-    if (dd == 'ras')  return OP_SAR;
-    if (dd == 'gen')  return OP_NEG;
-    if (dd == 'ton')  return OP_NOT;
-    if (dd == 'cda')  return OP_ADC;
-    if (dd == 'bbs')  return OP_SBB;
-    if (dd == 'qdc')  return OP_CDQ;
+    if (dd == 'lhs' || dd == 'dlhs') return OP_SHL;
+    if (dd == 'rhs' || dd == 'drhs') return OP_SHR;
+    if (dd == 'las') return OP_SAL;
+    if (dd == 'ras') return OP_SAR;
+    if (dd == 'gen') return OP_NEG;
+    if (dd == 'ton') return OP_NOT;
+    if (dd == 'cda') return OP_ADC;
+    if (dd == 'bbs') return OP_SBB;
+    if (dd == 'qdc') return OP_CDQ;
     if (dd == 'ghcx') return OP_XCHG;
-    if (dd == 'tb')   return OP_BT;
-    if (dd == 'ctb')  return OP_BTC;
-    if (dd == 'rtb')  return OP_BTR;
-    if (dd == 'stb')  return OP_BTS;
+    if (dd == 'tb') return OP_BT;
+    if (dd == 'ctb') return OP_BTC;
+    if (dd == 'rtb') return OP_BTR;
+    if (dd == 'stb') return OP_BTS;
 
     if ((dd & 0xFFFFFF) == 'tes') return OP_SET;
 
@@ -132,7 +122,7 @@ int __fastcall MDisasm::GetRegister(char* reg)
 //---------------------------------------------------------------------------
 int __fastcall MDisasm::Disassemble(DWORD fromAdr, PDISINFO pDisInfo, char* disLine)
 {
-    int     _res;
+    int _res;
 
     ::EnterCriticalSection(&g_cs);
 
@@ -147,9 +137,9 @@ int __fastcall MDisasm::Disassemble(DWORD fromAdr, PDISINFO pDisInfo, char* disL
 //---------------------------------------------------------------------------
 int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisInfo, char* disLine)
 {
-	int	    InstrLen, _res;
-	char    *p, *q;
-    char    Instr[1024];
+    int   InstrLen, _res;
+    char *p, *q;
+    char  Instr[1024];
 
     ::EnterCriticalSection(&g_cs);
 
@@ -195,7 +185,7 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
             FormatInstr(pDisInfo, disLine);
             if (pDisInfo->IndxReg != -1 && !pDisInfo->Scale) pDisInfo->Scale = 1;
 
-            DWORD   dd = *((DWORD*)pDisInfo->Mnem);
+            DWORD dd = *((DWORD*)pDisInfo->Mnem);
 
             if (pDisInfo->Mnem[0] == 'f' || dd == 'tiaw')
             {
@@ -227,15 +217,15 @@ int __fastcall MDisasm::Disassemble(BYTE* from, __int64 address, PDISINFO pDisIn
     }
 
     ::LeaveCriticalSection(&g_cs);
-	return _res;
+    return _res;
 }
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
 {
-    BYTE    _repPrefix, p, *ArgInfo;
+    BYTE        _repPrefix, p, *ArgInfo;
     const char* OpName;
-    int     i, Bytes = 0;
-    DWORD   Cmd, Arg;
+    int         i, Bytes = 0;
+    DWORD       Cmd, Arg;
 
     if (disLine) *disLine = 0;
     _repPrefix = GetRepPrefix();
@@ -355,9 +345,9 @@ void __fastcall MDisasm::FormatInstr(PDISINFO pDisInfo, char* disLine)
     }
 }
 //---------------------------------------------------------------------------
-int __fastcall MDisasm::OutputGeneralRegister(char *dst, int reg, int size)
+int __fastcall MDisasm::OutputGeneralRegister(char* dst, int reg, int size)
 {
-BYTE        OperandSize;
+    BYTE OperandSize;
 
     if (size == 1)
     {
@@ -382,10 +372,10 @@ BYTE        OperandSize;
     return 16;
 }
 //---------------------------------------------------------------------------
-void __fastcall MDisasm::OutputHex(char *dst, DWORD val)
+void __fastcall MDisasm::OutputHex(char* dst, DWORD val)
 {
-    BYTE    b;
-    char    buf[12];
+    BYTE b;
+    char buf[12];
 
     if (val <= 9)
     {
@@ -398,10 +388,10 @@ void __fastcall MDisasm::OutputHex(char *dst, DWORD val)
     strcat(dst, buf);
 }
 //---------------------------------------------------------------------------
-DWORD   __fastcall MDisasm::GetAddress()
+DWORD __fastcall MDisasm::GetAddress()
 {
-int         n;
-DWORD       res = 0;
+    int   n;
+    DWORD res = 0;
 
     // clang-format off
     __asm
@@ -542,8 +532,8 @@ DWORD       res = 0;
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::OutputSegPrefix(char* dst, PDISINFO pDisInfo)
 {
-    BYTE    _segPrefix;
-    const char    *sptr = NULL;
+    BYTE        _segPrefix;
+    const char* sptr = NULL;
 
     _segPrefix = GetSegPrefix();
     switch (_segPrefix)
@@ -579,9 +569,9 @@ void __fastcall MDisasm::OutputSegPrefix(char* dst, PDISINFO pDisInfo)
 //---------------------------------------------------------------------------
 int __fastcall MDisasm::EvaluateOperandSize()
 {
-    BYTE    OperandSize;
-    DWORD   Ofs;
-    int     OpSize;
+    BYTE  OperandSize;
+    DWORD Ofs;
+    int   OpSize;
 
     OperandSize = GetOperandSize();
     // clang-format off
@@ -594,21 +584,21 @@ int __fastcall MDisasm::EvaluateOperandSize()
     }
     // clang-format on
 
-    OpSize = (!OperandSize) ? 2: 4;
+    OpSize = (!OperandSize) ? 2 : 4;
     if (Ofs == 0x1041BB30 ||    //INVLPG, PREFETCH, PREFETCHW
         Ofs == 0x1041C370)      //LEA
         return 0;
     if (Ofs == 0x1041BC38)      //BOUND
-        return 2*OpSize;
+        return 2 * OpSize;
     if (Ofs == 0x1041BCB0 ||    //CALL, JMP
         Ofs == 0x1041C3E8)      //LES, LDS, LSS, LFS, LGS
         return OpSize + 2;
     if (Ofs == 0x1041BC98 ||    //FLDENV
         Ofs == 0x1041C460)      //FNSTENV
-        return (!OperandSize) ? 14: 28;
+        return (!OperandSize) ? 14 : 28;
     if (Ofs == 0x1041BCF8 ||    //FRSTOR
         Ofs == 0x1041C4C0)      //FNSAVE
-        return (!OperandSize) ? 94: 108;
+        return (!OperandSize) ? 94 : 108;
     return OpSize;
 }
 //---------------------------------------------------------------------------
@@ -625,35 +615,35 @@ const char* __fastcall MDisasm::GetSizeString(int size)
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::OutputSizePtr(int size, bool mm, PDISINFO pDisInfo, char* disLine)
 {
-    const char*   sptr = NULL;
+    const char* sptr = NULL;
 
     if (!size) size = EvaluateOperandSize();
     switch (size)
     {
-        case 1:
-            sptr = "byte";
-            break;
-        case 2:
-            sptr = "word";
-            break;
-        case 4:
-            sptr = "dword";
-            break;
-        case 6:
-            sptr = "fword";
-            break;
-        case 8:
-            if (mm)
-                sptr = "mmword";
-            else
-                sptr = "qword";
-            break;
-        case 10:
-            sptr = "tbyte";
-            break;
-        case 16:
-            if (mm) sptr = "xmmword";
-            break;
+    case 1:
+        sptr = "byte";
+        break;
+    case 2:
+        sptr = "word";
+        break;
+    case 4:
+        sptr = "dword";
+        break;
+    case 6:
+        sptr = "fword";
+        break;
+    case 8:
+        if (mm)
+            sptr = "mmword";
+        else
+            sptr = "qword";
+        break;
+    case 10:
+        sptr = "tbyte";
+        break;
+    case 16:
+        if (mm) sptr = "xmmword";
+        break;
     }
     if (sptr)
     {
@@ -669,10 +659,10 @@ void __fastcall MDisasm::OutputSizePtr(int size, bool mm, PDISINFO pDisInfo, cha
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1, bool f2, PDISINFO pDisInfo, char* disLine)
 {
-    BYTE    PostByte, SegPrefix, mod, *pos, sib, b;
-    bool    ofs, ofs1, ib, mm;
-    int     ss, index, base, idxofs, idxval;
-    DWORD   offset32;
+    BYTE  PostByte, SegPrefix, mod, *pos, sib, b;
+    bool  ofs, ofs1, ib, mm;
+    int   ss, index, base, idxofs, idxval;
+    DWORD offset32;
 
     // clang-format off
     __asm
@@ -724,7 +714,7 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
     {
         sib = *pos++;
         if ((sib & 7) == 5 && !mod)
-            base = - 1;
+            base = -1;
         else
             base = sib & 7;
         index = (sib >> 3) & 7;
@@ -732,17 +722,15 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
             ss = 1 << (sib >> 6);
         else
             index = -1;
-        if ((sib & 7) == 5 && !mod)
-            ofs = true;
+        if ((sib & 7) == 5 && !mod) ofs = true;
     }
-    
+
     offset32 = 0;
     if ((PostByte & 0xC0) == 0x40)  //mod=01
     {
         b = *pos;
         offset32 = b;
-        if ((b & 0x80) != 0)
-            offset32 |= 0xFFFFFF00;
+        if ((b & 0x80) != 0) offset32 |= 0xFFFFFF00;
     }
     else if ((PostByte & 0xC0) == 0x80) //mod=10
         ofs = true;
@@ -822,12 +810,12 @@ void __fastcall MDisasm::OutputMemAdr32(int argno, char* dst, DWORD arg, bool f1
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1, bool f2, PDISINFO pDisInfo, char* disLine)
 {
-    BYTE    PostByte, SegPrefix, b;
-    bool    ofs, mm;
+    BYTE        PostByte, SegPrefix, b;
+    bool        ofs, mm;
     const char* regcomb;
-    char    sign;
-    int     idxofs, idxval;
-    DWORD   offset16, dval;
+    char        sign;
+    int         idxofs, idxval;
+    DWORD       offset16, dval;
 
     // clang-format off
     __asm
@@ -861,14 +849,10 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
     {
         b = PostByte & 7;
         regcomb = RegCombTab[b];
-        if (b == 0 || b == 1 || b == 7)
-            pDisInfo->BaseReg = 11;
-        if (b == 2 || b == 3 || b == 6)
-            pDisInfo->BaseReg = 13;
-        if (b == 0 || b == 2 || b == 4)
-            pDisInfo->IndxReg = 14;
-        if (b == 1 || b == 3 || b == 5)
-            pDisInfo->IndxReg = 15;
+        if (b == 0 || b == 1 || b == 7) pDisInfo->BaseReg = 11;
+        if (b == 2 || b == 3 || b == 6) pDisInfo->BaseReg = 13;
+        if (b == 0 || b == 2 || b == 4) pDisInfo->IndxReg = 14;
+        if (b == 1 || b == 3 || b == 5) pDisInfo->IndxReg = 15;
     }
     sign = 0;
 
@@ -940,10 +924,10 @@ void __fastcall MDisasm::OutputMemAdr16(int argno, char* dst, DWORD arg, bool f1
 //---------------------------------------------------------------------------
 void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDisInfo, char* disLine)
 {
-    BYTE    AddressSize, OperandSize;
-    DWORD   dval, adr;
-    int     ival, idxofs, idxval, stno;
-    char    Op[64], *p = Op;
+    BYTE  AddressSize, OperandSize;
+    DWORD dval, adr;
+    int   ival, idxofs, idxval, stno;
+    char  Op[64], *p = Op;
 
     *p = 0;
 
@@ -1303,7 +1287,7 @@ void __fastcall MDisasm::FormatArg(int argno, DWORD cmd, DWORD arg, PDISINFO pDi
 //---------------------------------------------------------------------------
 bool __fastcall MDisasm::GetAddressSize()
 {
-bool        res;
+    bool res;
 
     // clang-format off
     __asm
@@ -1318,7 +1302,7 @@ bool        res;
 //---------------------------------------------------------------------------
 bool __fastcall MDisasm::GetOperandSize()
 {
-bool        res;
+    bool res;
 
     // clang-format off
     __asm
@@ -1333,7 +1317,7 @@ bool        res;
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetSegPrefix()
 {
-BYTE        res;
+    BYTE res;
 
     // clang-format off
     __asm
@@ -1348,7 +1332,7 @@ BYTE        res;
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetRepPrefix()
 {
-BYTE        res;
+    BYTE res;
 
     // clang-format off
     __asm
@@ -1363,7 +1347,7 @@ BYTE        res;
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetCop()
 {
-BYTE        res;
+    BYTE res;
 
     // clang-format off
     __asm
@@ -1379,7 +1363,7 @@ BYTE        res;
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetCop1()
 {
-BYTE        res;
+    BYTE res;
 
     // clang-format off
     __asm
@@ -1395,7 +1379,7 @@ BYTE        res;
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetPostByte()
 {
-BYTE         res;
+    BYTE res;
 
     // clang-format off
     __asm
@@ -1424,7 +1408,7 @@ void __fastcall MDisasm::SetPostByte(BYTE b)
 //---------------------------------------------------------------------------
 BYTE __fastcall MDisasm::GetPostByteMod()
 {
-BYTE         res;
+    BYTE res;
 
     // clang-format off
     __asm
@@ -1441,7 +1425,7 @@ BYTE         res;
 //---------------------------------------------------------------------------
 int __fastcall MDisasm::GetPostByteReg()
 {
-int         res;
+    int res;
 
     // clang-format off
     __asm
@@ -1459,7 +1443,7 @@ int         res;
 //---------------------------------------------------------------------------
 int __fastcall MDisasm::GetPostByteRm()
 {
-int         res;
+    int res;
 
     // clang-format off
     __asm

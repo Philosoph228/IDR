@@ -8,10 +8,10 @@ AlignConsecutiveAssignments: None                  # edit distance 108895
 AlignConsecutiveBitFields: None                    # inherited from prefix Align
 AlignConsecutiveDeclarations:
   Enabled: true
-  AcrossEmptyLines: true
-  AcrossComments: true
-  AlignCompound: true
-  PadOperators: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+  # AlignCompound: true
+  # PadOperators: true
 AlignConsecutiveMacros: AcrossEmptyLines           # edit distance 107915
 AlignEscapedNewlines: Right                        # Using default value Right
 AlignOperands: DontAlign                           # edit distance 107751
@@ -34,10 +34,10 @@ BinPackParameters: true                            # edit distance 73654
 BitFieldColonSpacing: Both                         # did not affect the output
 BreakBeforeBraces: Custom                          # edit distance 73654
 BraceWrapping:
-  AfterCaseLabel: false                            # edit distance 73654
+  AfterCaseLabel: true
   AfterClass: true                                 # edit distance 73654
   AfterControlStatement: Always                    # edit distance 73654
-  AfterEnum: false                                 # edit distance 73559
+  AfterEnum: true
   AfterFunction: true                              # edit distance 73559
   AfterNamespace: true                             # inherited from prefix BraceWrapping
   AfterObjCDeclaration: true                       # inherited from prefix BraceWrapping
@@ -62,7 +62,7 @@ ColumnLimit: 140                                   # edit distance 68305
 CompactNamespaces: true                            # did not affect the output
 ConstructorInitializerIndentWidth: 0               # did not affect the output
 ContinuationIndentWidth: 4                         # edit distance 67966
-Cpp11BracedListStyle: true                         # edit distance 67966
+Cpp11BracedListStyle: false
 DeriveLineEnding: true                             # inherited from prefix Derive
 DerivePointerAlignment: true                       # edit distance 66746
 EmptyLineAfterAccessModifier: Never                # edit distance 66746
@@ -81,7 +81,10 @@ IndentWidth: 4                                     # edit distance 66704
 IndentWrappedFunctionNames: false                  # inherited from prefix Indent
 InsertNewlineAtEOF: true
 InsertTrailingCommas: None                         # did not affect the output
-KeepEmptyLinesAtTheStartOfBlocks: false             # edit distance 66704
+KeepEmptyLines:
+  AtEndOfFile: true
+  AtStartOfBlock: true
+  AtStartOfFile: false
 LambdaBodyIndentation: Signature                   # did not affect the output
 MaxEmptyLinesToKeep: 2                             # edit distance 66700
 NamespaceIndentation: None                         # did not affect the output
@@ -102,7 +105,7 @@ ReferenceAlignment: Pointer                        # did not affect the output
 RemoveBracesLLVM: false                            # edit distance 66182
 ReflowComments: false                              # edit distance 61156
 RequiresClausePosition: OwnLine                    # did not affect the output
-SeparateDefinitionBlocks: Never                    # edit distance 61156
+SeparateDefinitionBlocks: Leave                    # edit distance 61156
 ShortNamespaceLines: 0                             # did not affect the output
 SortIncludes: Never                                # edit distance 59194
 SortUsingDeclarations: true                        # did not affect the output
