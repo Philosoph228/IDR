@@ -115,7 +115,6 @@ SpaceBeforeParensOptions:
   AfterControlStatements: true                     # edit distance 59193
   AfterForeachMacros: false                        # inherited from prefix SpaceBefore
   AfterFunctionDeclarationName: false              # edit distance 59193
-  AfterFunctionDeclarationName: false              # inherited from prefix SpaceBefore
   AfterFunctionDefinitionName: false               # edit distance 59193
   AfterIfMacros: false                             # inherited from prefix SpaceBefore
   AfterOverloadedOperator: false                   # edit distance 59193
