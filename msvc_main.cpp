@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <vector>
+#include <ShObjIdl_core.h>
 
 BYTE*            Code;
 CRITICAL_SECTION g_cs;
@@ -99,6 +100,42 @@ void AllocCode()
     Code = (BYTE*)malloc(CODE_SIZE);
 }
 
+std::wstring request_open_file()
+{
+    IFileOpenDialog* pFileDialog = nullptr;
+    IShellItem*      pSIResult = nullptr;
+
+    HRESULT hr = S_OK;
+
+    hr = ::CoInitialize(nullptr);
+    if (FAILED(hr)) throw std::runtime_error("Failed to initialize COM");
+
+    hr = ::CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pFileDialog));
+    if (FAILED(hr)) throw std::runtime_error("Failed to create CLSID_FileOpenDialog instance");
+
+    static const COMDLG_FILTERSPEC s_rgReadTypes[2] = {
+        { L"PE Binary", L"*.exe;*.dll" },
+        { L"All files", L"*.*" },
+    };
+
+    hr = pFileDialog->SetFileTypes(ARRAYSIZE(s_rgReadTypes), s_rgReadTypes);
+    if (FAILED(hr)) throw std::runtime_error("Failed to set file types");
+
+    hr = pFileDialog->Show(nullptr);
+    if (FAILED(hr)) throw std::runtime_error("Failed to show dialog");
+
+    hr = pFileDialog->GetResult(&pSIResult);
+    if (FAILED(hr)) throw std::runtime_error("Failed to get results");
+
+    LPWSTR pwszPath = nullptr;
+    hr = pSIResult->GetDisplayName(SIGDN_FILESYSPATH, &pwszPath);
+    if (FAILED(hr)) throw std::runtime_error("Failed to get display name");
+
+    std::wstring path(pwszPath);
+
+    return path;
+}
+
 struct SectionInfo
 {
     std::string name;
@@ -160,7 +197,7 @@ std::vector<SectionInfo> parse_pe_sections(const std::wstring& path)
         file.read(reinterpret_cast<char*>(&sh), sizeof(sh));
 
         SectionInfo info;
-        info.name = std::string(reinterpret_cast<char*>(&sh), sizeof(sh));
+        info.name = std::string(reinterpret_cast<char*>(&sh.Name), strnlen(reinterpret_cast<const char*>(sh.Name), IMAGE_SIZEOF_SHORT_NAME));
 
         info.virtualSize = sh.Misc.VirtualSize;
         info.virtualAddress = sh.VirtualAddress;
@@ -170,10 +207,20 @@ std::vector<SectionInfo> parse_pe_sections(const std::wstring& path)
 
         sections.push_back(info);
     }
+
+    return sections;
 }
 
 int main(int argc, char* argv[])
 {
+    auto path = request_open_file();
+    auto sections = parse_pe_sections(path);
+
+    for (auto section : sections)
+    {
+        std::cout << section.name << '\n';
+    }
+
     g_hInst = ::GetModuleHandle(nullptr);
 
     RegisterDisasmViewClass();
