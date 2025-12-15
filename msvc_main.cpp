@@ -3,6 +3,9 @@
 #include <iostream>
 #include "resource.h"
 
+#include <fstream>
+#include <vector>
+
 BYTE*            Code;
 CRITICAL_SECTION g_cs;
 
@@ -94,6 +97,79 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void AllocCode()
 {
     Code = (BYTE*)malloc(CODE_SIZE);
+}
+
+struct SectionInfo
+{
+    std::string name;
+    uint32_t    virtualSize;
+    uint32_t    virtualAddress;
+    uint32_t    rawSize;
+    uint32_t    rawOffset;
+    uint32_t    characteristics;
+};
+
+std::vector<SectionInfo> parse_pe_sections(const std::wstring& path)
+{
+    std::ifstream file(path, std::ios::binary);
+    if (!file) throw std::runtime_error("Failed to open file");
+
+    // read DOS header
+    IMAGE_DOS_HEADER dos{};
+    file.read(reinterpret_cast<char*>(&dos), sizeof(dos));
+    if (dos.e_magic != IMAGE_DOS_SIGNATURE) throw std::runtime_error("Not a PE file (invalid DOS signature)");
+
+    // Move to NT headers
+    file.seekg(dos.e_lfanew, std::ios::beg);
+
+    DWORD ntSignature{};
+    file.read(reinterpret_cast<char*>(&ntSignature), sizeof(ntSignature));
+    if (ntSignature != IMAGE_NT_SIGNATURE) throw std::runtime_error("Invalid NT signature");
+
+    // Read File Header
+    IMAGE_FILE_HEADER fileHeader{};
+    file.read(reinterpret_cast<char*>(&fileHeader), sizeof(fileHeader));
+
+    // Read Optional Header magic to determine 32/64-bit
+    WORD magic{};
+    file.read(reinterpret_cast<char*>(&magic), sizeof(magic));
+    file.seekg(-static_cast<std::streamoff>(sizeof(magic)), std::ios::cur);
+
+    if (magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+    {
+        IMAGE_OPTIONAL_HEADER64 optional{};
+        file.read(reinterpret_cast<char*>(&optional), sizeof(optional));
+    }
+    else if (magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+    {
+        IMAGE_OPTIONAL_HEADER32 optional{};
+        file.read(reinterpret_cast<char*>(&optional), sizeof(optional));
+    }
+    else
+    {
+        throw std::runtime_error("Unknown optional header format");
+    }
+
+    // Read section headers
+    std::vector<SectionInfo> sections;
+    sections.reserve(fileHeader.NumberOfSections);
+
+    for (int i = 0; i < fileHeader.NumberOfSections; ++i)
+    {
+        IMAGE_SECTION_HEADER sh{};
+        file.read(reinterpret_cast<char*>(&sh), sizeof(sh));
+
+        SectionInfo info;
+        info.name = std::string(reinterpret_cast<char*>(&sh), sizeof(sh));
+
+        info.virtualSize = sh.Misc.VirtualSize;
+        info.virtualAddress = sh.VirtualAddress;
+        info.rawSize = sh.SizeOfRawData;
+        info.rawOffset = sh.PointerToRawData;
+        info.characteristics = sh.Characteristics;
+
+        sections.push_back(info);
+    }
 }
 
 int main(int argc, char* argv[])
