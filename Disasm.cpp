@@ -471,6 +471,7 @@ DWORD __fastcall MDisasm::GetAddress()
         // clang-format off
         __asm
         {
+            mov     ecx, [DIS]
             mov     al, [ecx+51h]
             test    al, al
             jz      GA3
